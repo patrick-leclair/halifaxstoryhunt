@@ -1,0 +1,356 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Halifax Story Hunt</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400&family=Libre+Caslon+Text:ital,wght@0,400;0,700;1,400&display=swap">
+<style>
+/* Admiralty-chart look for Halifax harbour: chart paper, harbour navy, brass, tartan ribbon, Georgian reading type.
+   Doors are numbered like channel buoys (odd red to port, even green to starboard). */
+:root {
+  --paper: #F3EEE1;
+  --card: #FBF8F0;
+  --ink: #0F2A47;
+  --muted: #5C6571;
+  --line: #D6CCB3;
+  --grid: #E7DFC9;
+  --port: #B8372A;
+  --stbd: #1B6E52;
+  --port-tint: #F6DDD6;
+  --stbd-tint: #D9EBDF;
+  --chip: #E9E1CB;
+  --brass: #B07F22;
+  --on-ink: #FBF8F0;
+  --f-display: "Barlow Condensed", "Arial Narrow", "Helvetica Neue", sans-serif;
+  --f-body: "Barlow", "Helvetica Neue", Arial, sans-serif;
+  --f-serif: "Libre Caslon Text", Georgia, "Times New Roman", serif;
+  --f-mono: "IBM Plex Mono", ui-monospace, Menlo, Consolas, monospace;
+  --read: 20px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #07131E; --card: #0F2234; --ink: #EDE6D3; --muted: #A5B3BF; --line: #28445C; --grid: #0D1E2D;
+    --port: #F08A76; --stbd: #62CFA6; --port-tint: #3A211F; --stbd-tint: #123226; --chip: #17314A; --brass: #E0B25A; --on-ink: #07131E;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #07131E; --card: #0F2234; --ink: #EDE6D3; --muted: #A5B3BF; --line: #28445C; --grid: #0D1E2D;
+  --port: #F08A76; --stbd: #62CFA6; --port-tint: #3A211F; --stbd-tint: #123226; --chip: #17314A; --brass: #E0B25A; --on-ink: #07131E;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body {
+  background-color: var(--paper);
+  background-image:
+    linear-gradient(var(--grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size: 44px 44px;
+  color: var(--ink); font-family: var(--f-body); font-size: 17px; line-height: 1.5;
+  padding-block: 28px 56px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+/* tartan-style ribbon along the top edge */
+body::before {
+  content: ""; position: fixed; inset: 0 0 auto; height: calc(8px + env(safe-area-inset-top, 0px)); z-index: 10;
+  background:
+    repeating-linear-gradient(90deg, transparent 0 18px, rgba(255,255,255,.35) 18px 20px, transparent 20px 38px),
+    linear-gradient(90deg, #1F4E8C 0 30%, #1D6B4F 30% 52%, #E8E2D0 52% 56%, #C9962B 56% 62%, #B8372A 62% 68%, #1F4E8C 68% 100%);
+}
+.wrap { max-width: 640px; margin: 0 auto; display: flex; flex-direction: column; gap: 24px; }
+a { color: inherit; }
+:focus-visible { outline: 3px solid var(--brass); outline-offset: 2px; border-radius: 6px; }
+.mono { font-family: var(--f-mono); font-size: 12.5px; letter-spacing: .02em; color: var(--muted); }
+.eyebrow { font-family: var(--f-mono); font-size: 12.5px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+h1, h2, h3 { font-family: var(--f-display); font-weight: 700; line-height: 1.02; margin: 0; text-wrap: balance; }
+h1 { font-size: clamp(46px, 13vw, 68px); letter-spacing: .01em; text-transform: uppercase; }
+h2 { font-size: 28px; letter-spacing: .03em; text-transform: uppercase; display: flex; align-items: center; gap: 12px; }
+h2::after { content: ""; flex: 1; height: 0; border-top: 1.5px solid var(--line); border-bottom: 1.5px solid var(--line); padding-top: 2px; }
+h3 { font-size: 22px; letter-spacing: .02em; }
+p { margin: 0; }
+.top { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+.size { display: flex; gap: 6px; }
+.size button, .back {
+  font: 600 15px var(--f-body); color: var(--ink); background: var(--card); border: 1.5px solid var(--line);
+  border-radius: 6px; min-width: 44px; min-height: 44px; padding: 0 14px; cursor: pointer; text-decoration: none;
+  display: inline-flex; align-items: center; justify-content: center;
+}
+.lead { font-family: var(--f-serif); font-size: 18.5px; line-height: 1.55; max-width: 32em; }
+.hero { display: grid; grid-template-columns: 1fr auto; gap: 14px; align-items: start; }
+.rose { width: 84px; height: 84px; color: var(--ink); flex: none; margin-top: 4px; }
+.waves { display: block; width: 100%; height: 14px; color: var(--line); }
+.cart { box-shadow: inset 0 0 0 3px var(--card), inset 0 0 0 4.5px var(--line); }
+.doors { display: flex; flex-direction: column; gap: 10px; }
+.door-link {
+  display: grid; grid-template-columns: 52px 1fr; gap: 14px; align-items: center; text-decoration: none;
+  background: var(--card); border: 1.5px solid var(--line); border-radius: 8px; padding: 16px; box-shadow: inset 0 0 0 3px var(--card), inset 0 0 0 4.5px var(--line);
+}
+.door-link .name { font-family: var(--f-display); font-weight: 700; font-size: 26px; line-height: 1.05; text-transform: uppercase; letter-spacing: .02em; }
+.door-link .hook { color: var(--muted); font-size: 15.5px; margin-top: 2px; }
+.door-link .meta { margin-top: 6px; }
+.buoy {
+  width: 52px; height: 52px; border-radius: 50%; display: grid; place-items: center; flex: none;
+  font-family: var(--f-display); font-weight: 700; font-size: 30px; line-height: 1; color: #fff;
+  background: var(--port); border: 3px solid var(--card); box-shadow: 0 0 0 2px var(--port);
+}
+.buoy.s { background: var(--stbd); box-shadow: 0 0 0 2px var(--stbd); }
+.buoy.big { width: 64px; height: 64px; font-size: 38px; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .buoy { color: #07131E; } }
+:root[data-theme="dark"] .buoy { color: #07131E; }
+section { display: flex; flex-direction: column; gap: 12px; }
+.panel { background: var(--card); border: 1.5px solid var(--line); border-radius: 8px; padding: 20px; box-shadow: inset 0 0 0 3px var(--card), inset 0 0 0 4.5px var(--line); }
+.read { font-family: var(--f-serif); font-size: var(--read); line-height: 1.65; max-width: 32em; }
+.read::first-letter { font-family: var(--f-display); font-weight: 700; font-size: 1.7em; line-height: 1; color: var(--port); }
+.read-head { display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; align-items: baseline; }
+.tasks { display: flex; flex-direction: column; gap: 10px; }
+.task { display: grid; grid-template-columns: 1fr auto; gap: 6px 12px; background: var(--card); border: 1.5px solid var(--line); border-left: 5px solid var(--brass); border-radius: 8px; padding: 14px 16px; }
+.task .lab { font-family: var(--f-display); font-weight: 700; font-size: 20px; letter-spacing: .05em; text-transform: uppercase; }
+.pts { font-family: var(--f-mono); font-size: 13px; background: var(--chip); border-radius: 4px; padding: 2px 10px; align-self: start; white-space: nowrap; }
+.task p { grid-column: 1 / -1; }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip { font-family: var(--f-mono); font-size: 12.5px; background: var(--chip); border-radius: 4px; padding: 4px 12px; }
+.min { font-family: var(--f-mono); font-size: 13px; color: var(--muted); white-space: nowrap; }
+table { border-collapse: collapse; width: 100%; font-size: 15.5px; }
+th, td { text-align: left; padding: 8px 6px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { font-family: var(--f-mono); font-size: 11.5px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); font-weight: 400; }
+td.n, th.n { text-align: right; font-family: var(--f-mono); white-space: nowrap; }
+.rules { margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 6px; }
+.note { color: var(--muted); font-size: 15px; }
+@media (prefers-reduced-motion: no-preference) { .door-link, .team, .btn { transition: border-color .15s, transform .15s; } .door-link:hover, .team:hover { border-color: var(--ink); } .btn:active, .team:active { transform: translateY(1px); } }
+
+.teams { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.team { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 14px 6px 12px; border-radius: 8px; border: 1.5px solid var(--line);
+  background: var(--card); color: var(--ink); text-decoration: none; min-height: 96px; font: inherit; cursor: pointer; box-shadow: inset 0 0 0 3px var(--card), inset 0 0 0 4.5px var(--line); }
+.team .buoy { width: 44px; height: 44px; font-size: 26px; }
+.team span { font-family: var(--f-mono); font-size: 11.5px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+.btn { display: flex; align-items: center; justify-content: center; gap: 10px; min-height: 58px; padding: 12px 18px; border-radius: 8px; text-decoration: none; text-align: center;
+  font: 700 18px var(--f-display); letter-spacing: .06em; text-transform: uppercase; background: var(--ink); color: var(--on-ink); border: 0; border-bottom: 4px solid var(--brass); cursor: pointer; }
+.btn.alt { background: var(--card); color: var(--ink); border: 1.5px solid var(--ink); border-bottom: 4px solid var(--brass); }
+.stops { display: flex; flex-direction: column; gap: 0; }
+.stop { display: grid; grid-template-columns: 52px 1fr; gap: 2px 14px; align-items: center; padding: 12px 0; border-bottom: 1px dashed var(--line); }
+.stop:last-child { border-bottom: 0; }
+.stop .buoy { grid-row: 1 / span 2; }
+.stop .min { grid-column: 2; align-self: start; }
+.stop .nm { font-family: var(--f-display); font-weight: 700; font-size: 24px; line-height: 1.05; text-transform: uppercase; letter-spacing: .02em; }
+.stop.opt { opacity: .85; }
+.banner { border-radius: 8px; padding: 14px 16px; background: var(--chip); border: 1.5px solid var(--line); border-left: 5px solid var(--brass); }
+.banner.late { background: var(--port-tint); border-color: var(--port); border-left-color: var(--port); }
+.banner b { font-family: var(--f-display); font-size: 21px; letter-spacing: .03em; text-transform: uppercase; }
+.steps { margin: 0; padding-left: 22px; display: flex; flex-direction: column; gap: 8px; }
+.steps li::marker { font-family: var(--f-display); font-weight: 700; color: var(--brass); }
+.pb { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+.pb i { width: 38px; height: 8px; border-radius: 2px; background: var(--line); display: block; }
+.pb i.on { background: var(--brass); }
+.searchline { font-family: var(--f-mono); font-size: 13px; font-weight: 400; color: var(--ink); background: var(--chip); border-radius: 4px; padding: 2px 6px; display: inline-block; margin-top: 4px; user-select: all; -webkit-user-select: all; }
+.min a { color: var(--ink); }
+.foot { margin-top: 8px; display: flex; flex-direction: column; gap: 8px; align-items: center; text-align: center; color: var(--muted); }
+.foot .mono { font-size: 11.5px; letter-spacing: .12em; text-transform: uppercase; }
+</style>
+</head>
+<body>
+
+<div class="wrap" id="app"></div>
+<script>
+const DATA = {"doors": [{"search": "Old Town Clock, Halifax, NS", "n": 1, "slug": "door1", "name": "Old Town Clock", "theme": "Time and the Crown", "street": "Brunswick St, at the foot of Citadel Hill", "lat": 44.6474, "lon": -63.5776, "hook": "A prince obsessed with punctuality, a clock that keeps going, and the one time it stopped.", "good": "Outdoors, always accessible. Stay at street level: the grass slope is steep and may be icy.", "story": "You are standing at the foot of Citadel Hill. Halifax has been a garrison town since 1749, and one of its commanders, Prince Edward, Duke of Kent, had a famous obsession: punctuality. Before he left Halifax in 1800 he had plans drawn up for a clock to keep his troops on time. He never saw it finished. The clock began keeping time on October 20, 1803. Its works were made in London by the House of Vulliamy, a famous family of royal clockmakers. Three heavy weights drive the mechanism, a 13-foot pendulum sets its beat, and Parks Canada staff still wind it by hand twice a week. On December 6, 1917, the Halifax Explosion stopped the clock. It is said to be the only time it has ever stopped. Prince Edward went on to become the father of Queen Victoria. Before you leave, look up at the clock face. The clockmakers made a choice there that clock fans love to argue about.", "secs": 70, "listen": {"q": "Who ordered the clock, and what problem was it meant to solve?", "pts": 10}, "look": {"q": "Look at the clock face. How is the number four written? Write it down.", "pts": 10}, "creative": {"q": "Late for parade! Freeze in a mid-stride pose, everyone looking at the clock. Mime it: no running on the street.", "pts": 5}, "note": "The numeral is visible from street level; zoom if needed.", "fromHotel": 6, "back": 5, "next": {"2": 9, "3": 4, "4": 4, "5": 6, "6": 8}}, {"search": "St. Mary's Basilica, 5221 Spring Garden Rd, Halifax, NS", "n": 2, "slug": "door2", "name": "St. Mary’s Basilica", "theme": "Granite and faith", "street": "Spring Garden Rd at Barrington St", "lat": 44.6444, "lon": -63.5733, "hook": "A roof framed by shipwrights, pillars shipped from Scotland, and a spire with a record to its name.", "good": "Exterior only is fine. The church is generally open Mon–Fri 8:30–12 and 1–4:30 if a team wants to peek in (quiet voices).", "story": "This is Saint Mary’s Cathedral Basilica. After British anti-Catholic laws were repealed, the first Catholic church in Halifax was founded in 1784. The stone church behind this front was built between 1820 and 1829, and it was the first stone church in the city. Nobody in town had ever roofed a building this big, so the builders hired shipwrights, who framed the roof the way they would build the hull of a ship. The granite front and the spire came later. Polished granite pillars were shipped from Scotland, and on September 7, 1874, the cross was set on top of the spire, 189 feet above the sidewalk. It is said to be the tallest free-standing granite spire in North America. On December 6, 1917, the Halifax Explosion blew out the windows, and some of the bells cracked and were sent to England to be recast. Each year a Treaty Day Mass here remembers the 1752 treaty between the Mi’kmaq and the British.", "secs": 70, "listen": {"q": "Who was hired to build the roof, and why was that a good fit?", "pts": 10}, "look": {"q": "Count the gables (the triangular peaks) across the granite front. Write the number.", "pts": 10}, "creative": {"q": "Human spire: tallest teammate in the centre, everyone else stepping down on each side to make a spire shape. No climbing.", "pts": 5}, "note": "Best seen from across Spring Garden Rd. Cross at the lights.", "fromHotel": 4, "back": 4, "next": {"1": 10, "3": 8, "4": 9, "5": 7, "6": 11}}, {"search": "St. Paul's Church, 1749 Argyle St, Halifax, NS", "n": 3, "slug": "door3", "name": "St. Paul’s Church", "theme": "The oldest walls", "street": "Argyle St, south end of the Grand Parade", "lat": 44.6474, "lon": -63.5745, "hook": "Built the same year as the city. It survived the biggest man-made explosion of its time and kept two souvenirs.", "good": "Interior relics are visible only when the church is open. Posted hours for Tuesdays run about 9:00–3:00, so go early (before 2:55). Self-guided visits are free; quiet voices, no food or drink.", "story": "St. Paul’s was founded in 1749, the same year as Halifax itself, and its wooden walls went up in 1750. That makes it the oldest building in Halifax and the oldest Protestant church in Canada. The timbers were cut in Saco, Maine, and shipped north. In 1917 the Halifax Explosion blew out the windows but left the church standing, and the building kept two reminders. One is a piece of window frame still embedded in the wall above the War Memorial Arch in the entrance area. The other is a window in the west gallery where the glass broke in the shape of a human profile, head and shoulders. Stories differ about whose face it is. The church tells it as a clergyman from long ago, and other tellers have darker versions. Nobody can say for sure. The explosion killed nearly 2,000 people and injured about 9,000, and this church is one of the places where Halifax keeps that memory in plain sight.", "secs": 70, "listen": {"q": "In what year was St. Paul’s founded, and where were its timbers cut?", "pts": 10}, "look": {"q": "INSIDE (if open before 2:55): find the piece of window frame above the War Memorial Arch in the entrance area. What is it made of? OUTSIDE (if closed): photograph the whole team with the full church behind you.", "pts": 10}, "creative": {"q": "Portrait from 1750: line up like a formal portrait and keep a perfectly serious face.", "pts": 5}, "note": "Door 3 and Door 4 are neighbours: St. Paul’s is at the south end of the Grand Parade.", "fromHotel": 5, "back": 6, "next": {"1": 5, "2": 6, "4": 1, "5": 2, "6": 6}}, {"search": "Grand Parade, Halifax, NS", "n": 4, "slug": "door4", "name": "Grand Parade", "theme": "The town square", "street": "Barrington St / Argyle St, between City Hall and St. Paul’s", "lat": 44.648, "lon": -63.5748, "hook": "Where soldiers drilled in 1749 and where the city still gathers.", "good": "Open air, always accessible. The Cenotaph is a memorial: no clowning near it.", "story": "The Grand Parade is the oldest public open space in Halifax. When the town was founded in 1749 it was laid out as a parade ground where soldiers drilled, and the city grew up around it. Today it still works as the town square: Remembrance Day ceremonies, New Year’s Eve and the holiday tree lighting all happen here. At the north end stands City Hall, finished in 1890 and officially opened on May 22 of that year. At the south end stands St. Paul’s, founded the same year as the city. In the middle is the Cenotaph, about nine metres tall, unveiled on July 1, 1929 by former Prime Minister Robert Borden. A fountain stood here before it. The bronze figure on top is Britannia, victorious but grieving, representing Nova Scotia’s mothers. Later conflicts were added to the inscriptions over the years, most recently Afghanistan in 2015. This is a place of remembrance, so keep your voices low near the Cenotaph.", "secs": 65, "listen": {"q": "What was the Grand Parade first built for, and what does the bronze figure on the Cenotaph represent?", "pts": 10}, "look": {"q": "Walk around the Cenotaph and list every conflict named on it.", "pts": 10}, "creative": {"q": "Town crier: record a 10-second announcement of your team’s biggest news. Do it at the City Hall end, not near the Cenotaph.", "pts": 5}, "note": "City Hall (north end) and St. Paul’s (south end) both face the square.", "fromHotel": 6, "back": 7, "next": {"1": 5, "2": 8, "3": 1, "5": 2, "6": 5}}, {"search": "Province House, 1726 Hollis St, Halifax, NS", "n": 5, "slug": "door5", "name": "Province House", "theme": "Free press", "street": "Hollis St, between Prince and George", "lat": 44.6479, "lon": -63.5733, "hook": "A courtroom, a six-hour speech and a ten-minute verdict.", "good": "Inside is free but needs photo ID and security screening (open Mon–Fri 8:30–4:00, last entry 3:30). Plan on the grounds only. If the garden gate is closed, work from the sidewalk and fence.", "story": "Province House is the oldest legislative building in Canada. It was built between 1811 and 1819 of sandstone quarried at Wallace, Nova Scotia, and brought to Halifax by water. The Assembly still meets here. In 1835 the room that is now the Legislative Library was a courtroom, and a newspaper editor named Joseph Howe stood trial there. His paper had printed a letter accusing Halifax magistrates and police of pocketing thirty thousand pounds over thirty years, and he was charged with seditious libel. Howe had no lawyer. He defended himself, speaking for about six hours. The judge told the jury to convict him. The jury took about ten minutes to acquit. Howe’s paper declared that the press of Nova Scotia was free, and the case is remembered as a landmark for press freedom in Canada. Howe is honoured by a statue on the grounds. In the Library hangs a portrait of a man you may have met at the Old Town Clock: Prince Edward, Duke of Kent.", "secs": 70, "listen": {"q": "What was Joseph Howe charged with, and about how long did the jury take to decide?", "pts": 10}, "look": {"q": "On the grounds, photograph the Joseph Howe statue (5 points) and find one other monument and write its name (5 points).", "pts": 10}, "creative": {"q": "Front page: write a one-line headline about your team’s afternoon on paper and hold it up in front of the building.", "pts": 5}, "note": "The Howe statue is on the south side of the building.", "fromHotel": 6, "back": 8, "next": {"1": 7, "2": 7, "3": 2, "4": 3, "6": 4}}, {"search": "Historic Properties, 1869 Upper Water St, Halifax, NS", "n": 6, "slug": "door6", "name": "Historic Properties", "theme": "Sea and trade", "street": "Upper Water St, north end of the boardwalk", "lat": 44.6501, "lon": -63.5732, "hook": "Warehouses, privateers, and a legend that historians politely question.", "good": "The farthest door and the steepest walk back. The boardwalk is outdoors. Shops are generally open 10–6 on weekdays. Door 6 earns a +5 distance bonus.", "story": "Welcome to the waterfront. The Mi’kmaw name for this harbour is Kjipuktuk, meaning Great Harbour, and it is the reason Halifax exists. These stone and wooden warehouses date from about 1800 to the 1870s and were built for merchants and shipping companies. One of them is the Privateers’ Warehouse. Privateers were privately owned ships licensed by a government to capture enemy merchant vessels. In the War of 1812, Nova Scotian privateers seized more than 200 American merchant ships. Local tradition says Enos Collins, a privateer who became a banker, stored his prize cargo in this stone warehouse, which is probably the oldest building left on the Halifax waterfront. Historians who looked closely at the dates think the building may be a little too young for that story. In the 1960s the whole row was slated to make way for a highway. A study showed it mattered, and by the mid-1970s the warehouses had been restored into the shops and pubs you see now.", "secs": 70, "listen": {"q": "What is a privateer, and about how many American ships did Nova Scotian privateers seize in the War of 1812?", "pts": 10}, "look": {"q": "Find the Privateers’ Warehouse: a stone building with small windows and loading doors on the ground floor. Photograph it and write how many storeys it has.", "pts": 10}, "creative": {"q": "Licensed crew: pose as a ship’s crew with a captain pointing at the horizon and everyone in a role.", "pts": 5}, "note": "Walk the boardwalk side for the best view. Wind off the harbour makes it feel colder.", "fromHotel": 10, "back": 12, "next": {"1": 10, "2": 11, "3": 7, "4": 6, "5": 4}}], "scoring": [["Guide photo", 5, "Photo of the teammate reading the story aloud, landmark behind them."], ["Listen question", 10, "Answer from the story."], ["Look-around", 10, "Find it, count it or photograph it at the real place."], ["Creative photo", 5, "The photo challenge for that door."]], "routes": {"1": [1, 3, 2, 5], "2": [2, 1, 4, 6], "3": [3, 2, 1, 4], "4": [4, 6, 5, 3], "5": [5, 4, 6, 1], "6": [6, 5, 3, 2]}, "upload": "https://forms.cloud.microsoft/Pages/ResponsePage.aspx?id=YruorEE3CUyjzZa3gu4b7XQpgrXNiotHtwfEMrEoVqNUMjZYR0JWTUNOVTlWNVFENFAwTDE1MTVUNC4u", "form": "https://forms.cloud.microsoft/Pages/ResponsePage.aspx?id=YruorEE3CUyjzZa3gu4b7XQpgrXNiotHtwfEMrEoVqNUMjZYR0JWTUNOVTlWNVFENFAwTDE1MTVUNC4u", "hotel": {"name": "Cambridge Suites Halifax", "search": "Cambridge Suites Halifax, 1583 Brunswick St, Halifax, NS", "lat": 44.64517, "lon": -63.57551}};
+const app = document.getElementById("app");
+const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const cls = n => n % 2 ? "buoy" : "buoy s";
+const byN = n => DATA.doors.find(d => d.n === n);
+const coord = d => d.lat.toFixed(4) + "° N, " + Math.abs(d.lon).toFixed(4) + "° W";
+const DWELL = 6, START = 14 * 60 + 35, HARD = 15 * 60 + 20;
+const fmt = m => { const h = Math.floor(m / 60), mm = m % 60; return (h > 12 ? h - 12 : h) + ":" + String(mm).padStart(2, "0"); };
+function leg(a, b) { if (a === 0) return byN(b).fromHotel; return byN(a).next[b]; }
+function plan(team) {
+  const r = DATA.routes[team]; let t = START, prev = 0; const out = [];
+  r.forEach((n, i) => { const w = leg(prev, n); t += w; out.push({ n, walk: w, arrive: t, leave: t + DWELL, back: byN(n).back }); t += DWELL; prev = n; });
+  return out;
+}
+function lastTime(p, i) { return HARD - p[i].back; }   // latest moment to leave this door and still be back by 3:20
+const ROSE = `<svg class="rose" viewBox="0 0 100 100" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="50" cy="50" r="40"/><circle cx="50" cy="50" r="34" stroke-width=".7"/><path d="M50 8 L56 44 L92 50 L56 56 L50 92 L44 56 L8 50 L44 44 Z" fill="currentColor" stroke="none"/><path d="M50 8 L56 44 L50 50 Z" fill="var(--port)" stroke="none"/><path d="M23 23 L46 46 M77 23 L54 46 M23 77 L46 54 M77 77 L54 54" stroke-width="1"/><circle cx="50" cy="50" r="3" fill="var(--card)" stroke="none"/><text x="50" y="6" text-anchor="middle" font-family="Barlow Condensed, sans-serif" font-weight="700" font-size="9" fill="currentColor" stroke="none">N</text></svg>`;
+const WAVES = `<svg class="waves" viewBox="0 0 400 14" preserveAspectRatio="none" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M0 7 Q 12.5 0 25 7 T 50 7 T 75 7 T 100 7 T 125 7 T 150 7 T 175 7 T 200 7 T 225 7 T 250 7 T 275 7 T 300 7 T 325 7 T 350 7 T 375 7 T 400 7"/></svg>`;
+const FOOT = `<div class="foot">${WAVES}<span class="mono">Kjipuktuk · Halifax · est. 1749</span></div>`;
+let size = 20;
+try { const s = parseInt(localStorage.getItem("hsh-size"), 10); if (s >= 18 && s <= 30) size = s; } catch (e) {}
+function applySize() { document.documentElement.style.setProperty("--read", size + "px"); }
+function setSize(d) { size = Math.max(18, Math.min(30, size + d)); applySize(); try { localStorage.setItem("hsh-size", String(size)); } catch (e) {} }
+function getTeam() { try { const t = parseInt(localStorage.getItem("hsh-team"), 10); return t >= 1 && t <= 6 ? t : 0; } catch (e) { return 0; } }
+function saveTeam(t) { try { localStorage.setItem("hsh-team", String(t)); } catch (e) {} }
+function topBar(left) {
+  return `<div class="top">${left}<div class="size" role="group" aria-label="Story text size"><button type="button" id="sm" aria-label="Smaller text">A−</button><button type="button" id="lg" aria-label="Larger text">A+</button></div></div>`;
+}
+function wire() { const sm = document.getElementById("sm"), lg = document.getElementById("lg"); if (sm) sm.onclick = () => setSize(-2); if (lg) lg.onclick = () => setSize(2); }
+function upload(label) {
+  if (!DATA.upload) return "";
+  return `<a class="btn alt" href="${esc(DATA.upload)}" target="_blank" rel="noopener">${esc(label || "Upload your photos")}</a>`;
+}
+function submit(team, d) {
+  if (!DATA.form) return `<div class="panel"><p><b>Answers and photos</b></p><p class="note">Write your answers on your team scorecard and keep your photos on your phone.</p></div>`;
+  return `<div class="panel" style="display:flex;flex-direction:column;gap:12px">
+    <div><b style="font-family:var(--f-display);font-size:22px">Submit this door</b>
+    <p class="note" style="margin-top:4px">Your scribe submits for the team, signing in with their work account. One submission per door. Enter these two, then your listen answer, your look-around answer and your photos.</p></div>
+    <div class="chips"><span class="chip">Team ${team}</span><span class="chip">Door ${d.n}: ${esc(d.name)}</span></div>
+    <a class="btn" href="${esc(DATA.form)}" target="_blank" rel="noopener">Open the submission form</a></div>`;
+}
+function mapUrl(d) { return "https://www.google.com/maps/dir/?api=1&travelmode=walking&destination=" + d.lat + "," + d.lon; }
+function dirs(d, label) {
+  return `<div style="display:flex;flex-direction:column;gap:8px"><a class="btn alt" href="${mapUrl(d)}" target="_blank" rel="noopener">${esc(label)}</a>
+    <p class="note">Opens Google Maps with walking directions from where you are. Or search Maps for:<br><b class="searchline">${esc(d.search)}</b></p></div>`;
+}
+function tidy() { document.title = "Halifax Story Hunt"; app.insertAdjacentHTML("beforeend", FOOT); window.scrollTo(0, 0); }
+
+function index() {
+  const t = getTeam();
+  const resume = t ? `<a class="btn" href="#t${t}">Continue as Team ${t}</a>` : "";
+  const teams = [1,2,3,4,5,6].map(n => `<a class="team" href="#t${n}" data-t="${n}"><div class="${cls(n)}">${n}</div><span>Team</span></a>`).join("");
+  app.innerHTML = `
+    ${topBar('<span class="eyebrow">Annual meeting · Nov 24</span>')}
+    <header class="hero"><div style="display:flex;flex-direction:column;gap:14px">
+      <h1>Halifax Story Hunt</h1>
+      <p class="lead">A one-hour walk through six doors into old Halifax. Your team gets its own route, so you will not meet another team at the same door at the same time.</p></div>${ROSE}
+    </header>
+    ${resume}
+    <section aria-labelledby="th"><h2 id="th">Which team are you?</h2>
+      <div class="teams">${teams}</div>
+      <p class="note">Your team number is on your slip. Tap it once. The page remembers it on this phone.</p></section>
+    <section aria-labelledby="hw"><h2 id="hw">How it works</h2>
+      <div class="panel"><ol class="steps">
+        <li>The page tells you where to go first and how long the walk is.</li>
+        <li>At each door, read the story aloud (one reader, rotate), then do the listen, look-around and photo challenges.</li>
+        <li>Tap “Done here” and it sends you to your next door, nearest first.</li>
+        <li>Three doors for everyone. A fourth if the clock allows. Be back at the hotel by 3:20.</li></ol></div></section>
+    <section aria-labelledby="sh"><h2 id="sh">How points work</h2>
+      <div class="panel"><table><thead><tr><th>At each door</th><th>What</th><th class="n">Pts</th></tr></thead><tbody>${DATA.scoring.map(s => `<tr><td>${esc(s[0])}</td><td>${esc(DATA.form ? s[2].replace("Written on the scorecard.", "Typed into the form.") : s[2])}</td><td class="n">${s[1]}</td></tr>`).join("")}</tbody></table>
+      <p class="note" style="margin-top:12px">Bonuses: +5 for Door 6, +10 if your creative photo wins the vote at 3:20. −3 per minute after 3:20.</p></div></section>
+    <section aria-labelledby="rh"><h2 id="rh">Ground rules</h2>
+      <div class="panel"><ul class="rules">
+        <li>Stay together, use crosswalks, and walk. Sidewalks may be icy.</li>
+        <li>Only open a door’s story when you get there.</li>
+        <li>Churches and the Cenotaph are places of worship and remembrance. Keep voices low.</li>
+        <li>Photograph strangers only with their permission.</li></ul></div></section>
+    <p class="note">Browse without a team: <a href="#all">all six doors</a>.</p>`;
+  document.querySelectorAll(".team").forEach(a => a.addEventListener("click", () => saveTeam(parseInt(a.dataset.t, 10))));
+  wire(); tidy();
+}
+
+function overview(team) {
+  saveTeam(team);
+  const p = plan(team);
+  const core = p.slice(0, 3), opt = p[3];
+  const row = (s, i, optional) => `<div class="stop${optional ? " opt" : ""}"><span class="${cls(s.n)}">${s.n}</span>
+    <div><div class="nm">${esc(byN(s.n).name)}</div><div class="mono">${optional ? "Optional 4th · only if before " + fmt(HARD - s.walk - 4 - s.back) + " pm" : "Stop " + (i + 1) + " · about " + fmt(s.arrive) + " pm"}</div></div>
+    <span class="min">${s.walk} min walk · <a href="${mapUrl(byN(s.n))}" target="_blank" rel="noopener">Map</a></span></div>`;
+  app.innerHTML = `
+    ${topBar('<a class="back" href="#">← Teams</a>')}
+    <header style="display:flex;flex-direction:column;gap:10px"><span class="eyebrow">Your route</span><h1>Team ${team}</h1>
+      <p class="lead">Leave the hotel at 2:35. Your first door is ${esc(byN(core[0].n).name)}, ${core[0].walk} minutes away.</p></header>
+    <section aria-labelledby="rt"><h2 id="rt">Your stops</h2>
+      <div class="panel stops">${core.map((s, i) => row(s, i, false)).join("")}${row(opt, 3, true)}</div>
+      <p class="note">Routes are set so no two teams are scheduled at the same door at the same time. Times assume about ${DWELL} minutes at each door. If you fall behind, skip the optional door.</p></section>
+    <a class="btn" href="#t${team}s1">Start: head to Door ${core[0].n}</a>
+    ${dirs(byN(core[0].n), "Walking directions to Door " + core[0].n)}
+    <p class="note">Open the page for a door only when you arrive. Wrong team? <a href="#">Pick again</a>.</p>`;
+  wire(); tidy();
+}
+
+function doorBody(d) {
+  const mins = Math.round(d.secs / 5) * 5;
+  const task = (lab, t) => `<div class="task"><span class="lab">${lab}</span><span class="pts">${t.pts} pts</span><p>${esc(t.q)}</p></div>`;
+  return `
+    <p class="mono">${esc(d.street)} · ${coord(d)}</p>
+    <section aria-labelledby="rd">
+      <div class="read-head"><h2 id="rd">Read this aloud</h2><span class="mono">about ${mins} seconds</span></div>
+      <div class="panel"><p class="read">${esc(d.story)}</p></div>
+      <p class="note">Rotate the reader at every door. Take the guide photo while they read.</p>
+    </section>
+    <section aria-labelledby="ch"><h2 id="ch">Your challenges</h2>
+      <div class="tasks">${task("Listen", d.listen)}${task("Look around", d.look)}${task("Creative photo", d.creative)}
+        <div class="task"><span class="lab">Guide photo</span><span class="pts">5 pts</span><p>Photograph the reader mid-story with the landmark behind them.</p></div></div>
+      <p class="note">${esc(d.note)}</p></section>
+    <section aria-labelledby="gk"><h2 id="gk">Good to know</h2><div class="panel"><p>${esc(d.good)}</p></div></section>`;
+}
+function head(d, eyebrow) {
+  return `<header style="display:grid;grid-template-columns:64px 1fr;gap:16px;align-items:center">
+      <span class="${cls(d.n)} big">${d.n}</span>
+      <div style="display:flex;flex-direction:column;gap:6px"><span class="eyebrow">${eyebrow}</span><h1 style="font-size:clamp(36px,10vw,52px)">${esc(d.name)}</h1></div></header>`;
+}
+
+function stop(team, k) {
+  saveTeam(team);
+  const p = plan(team), s = p[k - 1], d = byN(s.n);
+  const bar = `<div class="pb" aria-label="Stop ${k} of 3 plus one optional">${[0,1,2,3].map(i => `<i class="${i < k ? "on" : ""}"></i>`).join("")}</div>`;
+  const now = new Date(), mins = now.getHours() * 60 + now.getMinutes();
+  const live = mins >= 14 * 60 + 25 && mins <= 15 * 60 + 40;
+  const must = lastTime(p, k - 1) - 0;   // leave this door by
+  const late = live && mins >= must;
+  const banner = `<div class="banner${late ? " late" : ""}"><b>${late ? "Time to head back to the hotel" : "Leave this door by " + fmt(must) + " pm to be back by 3:20"}</b><br><span class="note">${late ? "You are close to the 3:20 deadline. Skip any other doors." : "The hotel is " + s.back + " min from here."}</span></div>`;
+  let nextBlock;
+  if (k < 3) {
+    const n = p[k];
+    nextBlock = `<a class="btn" href="#t${team}s${k + 1}">Done here. Next: Door ${n.n}, ${n.walk} min</a><p class="note">${esc(byN(n.n).name)}. Nearest of your remaining doors, routed so another team is not heading there.</p>${dirs(byN(n.n), "Walking directions to Door " + n.n)}`;
+  } else if (k === 3) {
+    const n = p[3], by = HARD - n.walk - 4 - n.back;
+    const can = !live || mins <= by;
+    nextBlock = `${can ? `<a class="btn" href="#t${team}s4">Done here. Optional: Door ${n.n}, ${n.walk} min</a><p class="note">Only if you can leave by ${fmt(by)} pm. Otherwise head back.</p>${dirs(byN(n.n), "Walking directions to Door " + n.n)}` : ""}
+      <a class="btn${can ? " alt" : ""}" href="#t${team}done">Done here. Head back to the hotel (${s.back} min)</a>${dirs(DATA.hotel, "Walking directions to the hotel")}`;
+  } else {
+    nextBlock = `<a class="btn" href="#t${team}done">Done here. Head back to the hotel (${s.back} min)</a>${dirs(DATA.hotel, "Walking directions to the hotel")}`;
+  }
+  app.innerHTML = `
+    ${topBar(`<a class="back" href="#t${team}">← Team ${team} route</a>`)}
+    ${bar}
+    ${head(d, `Team ${team} · ${k === 4 ? "Optional stop" : "Stop " + k + " of 3"}`)}
+    ${banner}
+    ${doorBody(d)}
+    <section aria-labelledby="dn"><h2 id="dn">When you are done</h2><div style="display:flex;flex-direction:column;gap:12px">${submit(team, d)}${nextBlock}</div></section>`;
+  wire(); tidy();
+}
+
+function done(team) {
+  saveTeam(team);
+  app.innerHTML = `
+    ${topBar(`<a class="back" href="#t${team}">← Team ${team} route</a>`)}
+    <header style="display:flex;flex-direction:column;gap:10px"><span class="eyebrow">Team ${team}</span><h1>Back to the hotel</h1>
+      <p class="lead">Be in the lobby by 3:20. Each minute late costs 3 points.</p></header>
+    ${dirs(DATA.hotel, "Walking directions to the hotel")}
+    <section aria-labelledby="up"><h2 id="up">Before you arrive</h2><div class="panel"><ul class="rules">
+      <li>Pick your team’s best creative photo for the vote.</li>
+      ${DATA.form ? "<li>Check that every door you visited has been submitted.</li><li>Judges score from the submissions, so late ones may not count.</li>" : "<li>Hand your scorecard to the judges when you arrive.</li>"}</ul></div>
+      ${DATA.form ? `<a class="btn alt" href="${esc(DATA.form)}" target="_blank" rel="noopener">Open the submission form</a>` : ""}</section>
+    <p class="note"><a href="#all">Browse all six doors</a></p>`;
+  wire(); tidy();
+}
+
+function all() {
+  const doors = DATA.doors.map(d => `
+    <a class="door-link" href="#door${d.n}">
+      <span class="${cls(d.n)}">${d.n}</span>
+      <span><span class="name">${esc(d.name)}</span><span class="hook" style="display:block">${esc(d.hook)}</span>
+      <span class="mono meta" style="display:block">${d.fromHotel} min from the hotel · ${esc(d.theme)}</span></span>
+    </a>`).join("");
+  app.innerHTML = `${topBar('<a class="back" href="#">← Back</a>')}<h1>All six doors</h1><div class="doors">${doors}</div>`;
+  wire(); tidy();
+}
+function door(n) {
+  const d = byN(n);
+  app.innerHTML = `${topBar('<a class="back" href="#all">← All doors</a>')}${head(d, `Door ${n} of 6 · ${esc(d.theme)}`)}${doorBody(d)}`;
+  wire(); tidy();
+}
+function route() {
+  applySize();
+  const h = location.hash; let m;
+  if ((m = /^#t([1-6])s([1-4])$/.exec(h))) return stop(+m[1], +m[2]);
+  if ((m = /^#t([1-6])done$/.exec(h))) return done(+m[1]);
+  if ((m = /^#t([1-6])$/.exec(h))) return overview(+m[1]);
+  if ((m = /^#door([1-6])$/.exec(h))) return door(+m[1]);
+  if (h === "#all") return all();
+  index();
+}
+window.addEventListener("hashchange", route);
+route();
+</script>
+
+</body>
+</html>
